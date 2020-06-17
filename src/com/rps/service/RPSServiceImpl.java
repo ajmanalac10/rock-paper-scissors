@@ -1,30 +1,42 @@
 package com.rps.service;
 
-import com.rps.model.Player;
-import com.rps.constant.Constants.Winner;
-import com.rps.constant.Constants.Choices;
 import com.rps.constant.Constants;
+import com.rps.constant.Constants.Choices;
+import com.rps.constant.Constants.Winner;
+import com.rps.context.RPSPlayerContext;
+import com.rps.player.Player1Impl;
+import com.rps.player.Player2Impl;
 
-public class RPSServiceImpl implements RPSService {
+public class RPSServiceImpl implements IRPSService {
 
 	@Override
-	public void startGame(Player player1, Player player2) {
+	public void startGame() {
+		RPSPlayerContext rpsPlayer1 = new RPSPlayerContext(new Player1Impl());
+		RPSPlayerContext rpsPlayer2 = new RPSPlayerContext(new Player2Impl());
+		
+		rpsPlayer1.executeInitPlayer();
+		rpsPlayer2.executeInitPlayer();
+		
 		for (int round = 0; round < Constants.NO_OF_ROUNDS; round++) {
-			Choices playerChoice1 = Choices.PAPER;
-			Choices playerChoice2 = Choices.choiceRandomizer();  
-			Winner winner = evaluateChoices(playerChoice1, playerChoice2);
+			rpsPlayer1.executeUpdateChoice();
+			rpsPlayer2.executeUpdateChoice();
+			
+			Winner winner = evaluateChoices(rpsPlayer1, rpsPlayer2);
 
 			if (winner.equals(Winner.PLAYER1)) {
-				player1.setScore(player1.getScore() + 1);
+				rpsPlayer1.executeUpdateScore();
 			} else if (winner.equals(Winner.PLAYER2)) {
-				player2.setScore(player2.getScore() + 1);
+				rpsPlayer2.executeUpdateScore();
 			}
 		}
 
-		printResults(player1, player2);
+		printResults(rpsPlayer1, rpsPlayer2);
 	}
 	
-	private Winner evaluateChoices(Choices playerChoice1, Choices playerChoice2) {
+	private Winner evaluateChoices(RPSPlayerContext rpsPlayer1, RPSPlayerContext rpsPlayer2) {
+		Choices playerChoice1 = rpsPlayer1.executeRetrieveChoice();
+		Choices playerChoice2 = rpsPlayer2.executeRetrieveChoice();
+		
 		if (playerChoice1.equals(Choices.PAPER)) {
 			if (playerChoice2.equals(Choices.PAPER)) {
 				return Winner.TIE;
@@ -52,11 +64,11 @@ public class RPSServiceImpl implements RPSService {
 		}
 	}
 
-	private void printResults(Player player1, Player player2) {
-		int score1 = player1.getScore();
-		int score2 = player2.getScore();
-		String playerName1 = player1.getName();
-		String playerName2 = player2.getName();
+	private void printResults(RPSPlayerContext rpsPlayer1, RPSPlayerContext rpsPlayer2) {
+		int score1 = rpsPlayer1.executeRetrieveScore();
+		int score2 = rpsPlayer2.executeRetrieveScore();
+		String playerName1 = rpsPlayer1.executeRetrieveName();
+		String playerName2 = rpsPlayer2.executeRetrieveName();
 		
 		System.out.printf("Player %s wins %d of %d games\n", playerName1, score1, Constants.NO_OF_ROUNDS);
 		System.out.printf("Player %s wins %d of %d games\n", playerName2, score2, Constants.NO_OF_ROUNDS);

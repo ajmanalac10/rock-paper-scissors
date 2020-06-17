@@ -6,7 +6,7 @@ public class Constants {
 	public enum Choices {
 		ROCK, PAPER, SCISSORS;
 
-		public static Choices choiceRandomizer () {
+		public static Choices choiceRandomizer() {
 			return values()[(int) (Math.random() * values().length)];
 		}
 	}
